@@ -14,7 +14,7 @@ patch(ClosePosPopup.prototype, {
 
     async downloadSalesReport() {
         console.log("downloadSalesReport", this);
-        let report = this.create_report_close_custom();
+        let report =  await this.create_report_close_custom();
          console.log("report", report);
         if (report.success) {
             return this.report.doAction("report_pos_cash_closing.paperformat_cash_closing_custom", [report.report_id]);
