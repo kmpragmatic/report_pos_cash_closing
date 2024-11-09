@@ -9,7 +9,7 @@ import {_t} from "@web/core/l10n/translation";
 patch(ClosePosPopup.prototype, {
 
     async create_report_close_custom() {
-        return await this.orm.call("pos.daily.sales.reports.wizard", "create_report_from_ui", [this.pos.pos_session.id]);
+        return  this.orm.call("pos.daily.sales.reports.wizard", "create_report_from_ui", [this.pos.pos_session.id]);
     },
 
     async downloadSalesReport() {
