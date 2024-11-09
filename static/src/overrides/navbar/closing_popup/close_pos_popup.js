@@ -2,18 +2,20 @@
 import {ClosePosPopup} from "@point_of_sale/app/navbar/closing_popup/closing_popup";
 import {patch} from "@web/core/utils/patch";
 import {useService} from "@web/core/utils/hooks";
-import {RPCError} from "@web/core/network/rpc_service";
-import {ConfirmPopup} from "@point_of_sale/app/utils/confirm_popup/confirm_popup";
-import {_t} from "@web/core/l10n/translation";
 
 patch(ClosePosPopup.prototype, {
 
-    async create_report_close_custom() {
-        return  this.orm.call("pos.daily.sales.reports.wizard", "create_report_from_ui", [this.pos.pos_session.id]);
+    setup() {
+        super.setup();
+        this.actionService = useService("action");
     },
 
+
+
     async downloadSalesReport() {
-        return this.create_report_close_custom();
+        const action = await this.orm.call("pos.daily.sales.reports.wizard", "create_report_from_ui", [this.pos.pos_session.id]);
+        this.actionService.doAction(action);
+        // return this.create_report_close_custom();
         // console.log("downloadSalesReport", this);
         // let report_vals = await
         // console.log("report", report_vals);
