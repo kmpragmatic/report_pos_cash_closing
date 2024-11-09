@@ -3,8 +3,19 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError
 
+
 class PosDailyReport(models.TransientModel):
     _inherit = 'pos.daily.sales.reports.wizard'
+
+    @api.model
+    def create_report_from_ui(self, pos_session_id):
+        res = self.create({
+            'pos_session_id': pos_session_id,
+            'template_to_use': 'sec',
+        })
+        if res.id:
+            return {'success': True, 'report_id': res.id}
+        return {'success': False}
 
     template_to_use = fields.Selection([
         ('original', 'Original'),
@@ -13,9 +24,9 @@ class PosDailyReport(models.TransientModel):
 
     def generate_report(self):
         data = {
-            'date_start': False, 
-            'date_stop': False, 
-            'config_ids': self.pos_session_id.config_id.ids, 
+            'date_start': False,
+            'date_stop': False,
+            'config_ids': self.pos_session_id.config_id.ids,
             'session_ids': self.pos_session_id.ids,
             'template_to_use': self.template_to_use
         }
@@ -27,11 +38,13 @@ class PosDailyReport(models.TransientModel):
 
         return report_id.report_action([], data=data)
 
+
 class CustomReportSaleDetails(models.AbstractModel):
     _inherit = 'report.point_of_sale.report_saledetails'
 
     @api.model
-    def get_sale_details(self, date_start=False, date_stop=False, config_ids=False, session_ids=False, template_to_use=False):
+    def get_sale_details(self, date_start=False, date_stop=False, config_ids=False, session_ids=False,
+                         template_to_use=False):
         # Llamar al método original para obtener los datos por defecto
         sale_details = super(CustomReportSaleDetails, self).get_sale_details(
             date_start=date_start,
@@ -52,14 +65,17 @@ class CustomReportSaleDetails(models.AbstractModel):
         monto_inicial_turno = sessions[0].cash_register_balance_start if len(sessions) == 1 else 0
 
         # Monto total de ventas
-        monto_total_ventas = sum(order.amount_total for order in self.env['pos.order'].search([('session_id', 'in', session_ids)]))
+        monto_total_ventas = sum(
+            order.amount_total for order in self.env['pos.order'].search([('session_id', 'in', session_ids)]))
 
         # Monto total de ventas en efectivo
         payments = self.env["pos.payment"].search([('pos_order_id.session_id', 'in', session_ids)])
-        monto_total_ventas_efectivo = sum(payment.amount for payment in payments if payment.payment_method_id.is_cash_count)
+        monto_total_ventas_efectivo = sum(
+            payment.amount for payment in payments if payment.payment_method_id.is_cash_count)
 
         # Total ingresos
-        total_ingresos = sum(payment.amount for payment in self.env['pos.payment'].search([('pos_order_id.session_id', 'in', session_ids)]))
+        total_ingresos = sum(payment.amount for payment in
+                             self.env['pos.payment'].search([('pos_order_id.session_id', 'in', session_ids)]))
 
         # Total retiros
         cash_moves = self.env['account.bank.statement.line'].search([('pos_session_id', 'in', session_ids)])
@@ -78,7 +94,8 @@ class CustomReportSaleDetails(models.AbstractModel):
         total_ventas_medio_pago = []
         for payment in payments:
             payment_method = payment.payment_method_id.name
-            existing_payment = next((item for item in total_ventas_medio_pago if item['method'] == payment_method), None)
+            existing_payment = next((item for item in total_ventas_medio_pago if item['method'] == payment_method),
+                                    None)
             if existing_payment:
                 existing_payment['total'] += payment.amount
             else:
@@ -125,4 +142,3 @@ class CustomReportSaleDetails(models.AbstractModel):
                 }
 
         return gruop_invoice_by_type_document
-

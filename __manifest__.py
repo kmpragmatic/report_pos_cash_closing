@@ -12,6 +12,11 @@
         'views/inherit_views.xml',
 
     ],
+    'assets': {
+        'point_of_sale._assets_pos': [
+            'report_pos_cash_closing/static/src/**/*',
+        ],
+    },
     'license': "OPL-1",
     'installable': True,
     'application': False,
