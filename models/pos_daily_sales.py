@@ -13,9 +13,7 @@ class PosDailyReport(models.TransientModel):
             'pos_session_id': pos_session_id,
             'template_to_use': 'sec',
         })
-        if res.id:
-            return {'success': True, 'report_id': res.id}
-        return {'success': False}
+        return res.generate_report()
 
     template_to_use = fields.Selection([
         ('original', 'Original'),
